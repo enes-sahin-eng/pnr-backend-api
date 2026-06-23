@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// Ürünlerin tipini belirleyen mekanizma
+enum ProductType {
+  BASE_BAG    // Çanta Gövdesi (Aksesuarsız)
+  ACCESSORY   // Kulp, Askı, Zincir vb.
+}
+enum OrderStatus{
+  PENDING
+  PAID
+  SHIPPED
+  DELIVERED
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  name        String
+  description String?
+  price       Float
+  stock       Int         @default(1)
+  type        ProductType @default(BASE_BAG)
+  
+  // Frontend'de üst üste bindirilecek şeffaf (PNG) görselin veya 3D modelin linki
+  imageUrl    String?     
+  
+  // Eğer bu bir aksesuar ise, ekranda çantanın neresine oturacak? (Varsayılan koordinatlar)
+  defaultX    Int?        
+  defaultY    Int?        
+  
+  categoryId  String?
+  category    Category? @relation(fields:[categoryId],references:[id])
+
+  orderItems  OrderItem[]
+
+  createdAt   DateTime    @default(now())
+}
+
+model Category{
+  id            String @id @default(uuid())
+  name          String @unique
+  description   String?
+  products      Product[]
+  createdAt     DateTime @default(now())
+}
+model Order{
+  id            String @id @default(uuid())
+  totalAmount   Float 
+  status        OrderStatus @default(PENDING)
+  createdAt     DateTime   @default(now())
+
+  userId        String
+  user          User      @relation(fields:[userId],references:[id])
+  items         OrderItem[]
+}
+
+model OrderItem{
+  id            String  @id @default(uuid())
+  quentity      Int     @default(1)
+  price         Float   
+
+  orderId       String
+  order         Order                 @relation(fields:[orderId], references:[id])
+
+productId       String
+product         Product          @relation(fields:[productId],references:[id])
+}
+
+model User{
+  id            String @id @default(uuid())
+  fullname      String 
+  email         String @unique
+  password      String
+
+  orders        Order[]
+
+}
