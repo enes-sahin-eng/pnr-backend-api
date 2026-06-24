@@ -8,6 +8,7 @@ interface userBody {
   fullname: string;
   email: string;
   password: string;
+  role: string;
 }
 interface loginBody {
   email: string;
@@ -33,10 +34,10 @@ export const userRegister = async (
         email,
         password: hashedPasword,
       },
-      select: { id: true, fullname: true, email: true },
+      select: { id: true, fullname: true, email: true, role: true },
     });
     const token = jwt.sign(
-      { id: newUser.id },
+      { id: newUser.id, role: newUser.role },
       process.env.SECRET_TOKEN as string,
       {
         expiresIn: "1h",
@@ -69,7 +70,7 @@ export const userLogin = async (
       return;
     }
     const token = jwt.sign(
-      { id: user.id },
+      { id: user.id, role: user.role },
       process.env.SECRET_TOKEN as string,
       {
         expiresIn: "1h",
@@ -104,6 +105,25 @@ export const getProfil = async (req: Request, res: Response): Promise<void> => {
       return;
     }
     res.json(user);
+  } catch (err) {
+    res.status(500).json({ msg: "malesef sunucu hatası" });
+  }
+};
+export const getAllUsers = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const users = await prisma.user.findMany({
+      select: { fullname: true, email: true },
+    });
+    if (!users) {
+      res
+        .status(401)
+        .json({ msg: "Kullanıcı bulunamadı, oturumunuz sonlandırıldı." });
+      return;
+    }
+    res.json(users);
   } catch (err) {
     res.status(500).json({ msg: "malesef sunucu hatası" });
   }
