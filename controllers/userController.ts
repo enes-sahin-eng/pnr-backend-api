@@ -89,3 +89,22 @@ export const userLogin = async (
     res.status(500).json({ msg: "Malesef sunucu hatası " });
   }
 };
+
+export const getProfil = async (req: Request, res: Response): Promise<void> => {
+  const { userId } = req;
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { fullname: true, email: true },
+    });
+    if (!user) {
+      res
+        .status(401)
+        .json({ msg: "Kullanıcı bulunamadı, oturumunuz sonlandırıldı." });
+      return;
+    }
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ msg: "malesef sunucu hatası" });
+  }
+};
