@@ -16,7 +16,7 @@ app.get("/", (req: Request, res: Response) => {
 
 app.use("/api/products", productRouter);
 app.use("/api/categories", categoryRouter);
-app.use("/api/order", orderRouter);
+app.use("/api/orders", orderRouter);
 app.use("/api/user", userRouter);
 
 app.listen(3000, () => {

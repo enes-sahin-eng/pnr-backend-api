@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
-import { PrismaClient, ProductType } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { ProductType } from "@prisma/client";
+import { prisma } from "../utils/prisma";
 
 interface ProductBody {
   name: string;

@@ -1,26 +1,51 @@
 import { Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+import { OrderStatus } from "@prisma/client";
+import { prisma } from "../utils/prisma";
+
 interface OrderItemBody {
   productId: string;
   quantity: number;
-  price: number;
 }
 interface OrderBody {
   userId: string;
   totalAmount: number;
+  status: OrderStatus;
   items: OrderItemBody[];
 }
-
+interface OrderItemData {
+  productId: string;
+  quantity: number;
+  price: number;
+}
+type Params = {
+  id: string;
+};
 export const postOrder = async (
   req: Request<{}, {}, Omit<OrderBody, "userId">>,
   res: Response,
 ): Promise<void> => {
-  const { totalAmount, items } = req.body;
+  const { items } = req.body;
   const userId = req.userId as string;
+  let totalAmount = 0;
+  const orderItemsData: OrderItemData[] = [];
+  for (const item of items) {
+    const product = await prisma.product.findUnique({
+      where: { id: item.productId },
+    });
+    if (!product) {
+      res.status(404).json({ msg: "malesef bu rün bulunamadı" });
+      return;
+    }
+    orderItemsData.push({
+      price: product.price,
+      quantity: item.quantity,
+      productId: item.productId,
+    });
+    totalAmount += product.price * item.quantity;
+  }
   try {
     const newOrder = await prisma.order.create({
-      data: { userId, totalAmount, items: { create: items } },
+      data: { userId, totalAmount, items: { create: orderItemsData } },
     });
     res.status(201).json(newOrder);
   } catch (err) {
@@ -38,5 +63,29 @@ export const getOrder = async (req: Request, res: Response): Promise<void> => {
   } catch (err) {
     console.log(err);
     res.status(500).json({ msg: "malesef bir hata gerçekleşti" });
+  }
+};
+
+export const updateStatus = async (
+  req: Request<Params, {}, OrderBody>,
+  res: Response,
+): Promise<void> => {
+  const { id } = req.params;
+  const { status } = req.body;
+  try {
+    const updatedOrder = await prisma.order.update({
+      where: {
+        id,
+      },
+      data: {
+        status,
+      },
+    });
+    res.status(200).json({
+      message: "Order status updated successfully",
+      data: updatedOrder,
+    });
+  } catch (err) {
+    res.json(err);
   }
 };

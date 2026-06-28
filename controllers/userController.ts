@@ -1,8 +1,7 @@
 import { Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../utils/prisma";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-const prisma = new PrismaClient();
 
 interface userBody {
   fullname: string;
@@ -117,7 +116,7 @@ export const getAllUsers = async (
     const users = await prisma.user.findMany({
       select: { fullname: true, email: true },
     });
-    if (!users) {
+    if (users.length <= 0) {
       res
         .status(401)
         .json({ msg: "Kullanıcı bulunamadı, oturumunuz sonlandırıldı." });
