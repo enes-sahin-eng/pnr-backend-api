@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
  "scripts": {
-  "build": "tsc",
+  "build": "npx tsc",
   "start": "node dist/server.js",
-  "migrate": "npx prisma migrate deploy"
+  "postinstall": "npx prisma generate"
 },
   "keywords": [],
   "author": "",
