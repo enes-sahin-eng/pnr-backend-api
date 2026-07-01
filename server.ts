@@ -19,6 +19,7 @@ app.use("/api/categories", categoryRouter);
 app.use("/api/orders", orderRouter);
 app.use("/api/user", userRouter);
 
-app.listen(3000, () => {
-  console.log("3000 portu TypeScript ile dinleniyor");
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Sunucu ${PORT} portunda dinleniyor...`);
 });
