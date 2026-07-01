@@ -36,7 +36,7 @@ model Product {
   defaultY    Int?        
   
   categoryId  String?
-  category    Category? @relation(fields:[categoryId],references:[id])
+  category    Category? @relation(fields:[categoryId],references:[id],onDelete:SetNull)
 
   orderItems  OrderItem[]
 
