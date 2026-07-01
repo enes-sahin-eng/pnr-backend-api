@@ -1,10 +1,13 @@
 import express, { Request, Response } from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+
 dotenv.config();
 const app = express();
+
 app.use(express.json());
 app.use(cors());
+
 import productRouter from "./routes/Product";
 import categoryRouter from "./routes/Categories";
 import orderRouter from "./routes/Orders";
@@ -24,7 +27,8 @@ async function main() {
   await prisma.$connect();
 
   const PORT = process.env.PORT || 8080;
-  app.listen(PORT, () => {
+
+  app.listen(Number(PORT), "0.0.0.0", () => {
     console.log(`Sunucu ${PORT} portunda dinleniyor...`);
   });
 }
